@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Smart Study Buddy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Color Palette Logic */
+        :root {
+            /* Dark Mode (Current) */
+            --bg-main: #0a0a0f;
+            --bg-sidebar: rgba(18, 18, 27, 0.95);
+            --bg-card: rgba(18, 18, 27, 0.7);
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --banner-bg: linear-gradient(120deg, #1e1b4b 0%, #4338ca 50%, #6366f1 100%);
+        }
+
+        [data-theme="light"] {
+            /* Aesthetic Light Mode Palette from image_e73de7.png */
+            --bg-main: #f5f7f2;
+            --bg-sidebar: #cedef2;
+            --bg-card: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --border: #cbd5e0;
+            --accent: linear-gradient(135deg, #5b84b1 0%, #8da3cf 100%);
+            --banner-bg: linear-gradient(120deg, #cedef2 0%, #5b84b1 100%);
+        }
+
+        /* Update existing elements to use these variables */
+        body {
+            background: var(--bg-main) !important;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar {
+            background: var(--bg-sidebar) !important;
+            border-right: 1px solid var(--border);
+        }
+
+        .card,
+        .auth-card,
+        .content-card,
+        .document-card {
+            background: var(--bg-card) !important;
+            border: 1px solid var(--border) !important;
+        }
+
+        .profile-banner {
+            background: var(--banner-bg) !important;
+        }
+
+        .form-control {
+            background: rgba(0, 0, 0, 0.03) !important;
+            border: 1px solid var(--border) !important;
+            color: var(--text-primary) !important;
+        }
+
+        [data-theme="dark"] .form-control {
+            background: rgba(255, 255, 255, 0.03) !important;
+        }
+
+        .profile-details h3, .section-title, .brand-name {
+            color: var(--text-primary) !important;
+        }
+
+        .btn-primary,
+        .submit-btn {
+            background: var(--accent) !important;
+        }
+
+        /* Theme Toggle Button Styling */
+        .theme-toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 80px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(99, 102, 241, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 0;
+            gap: 8px;
+            width: 80px;
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        .sidebar:hover {
+            width: 200px;
+            align-items: flex-start;
+            padding-left: 20px;
+        }
+
+        .sidebar-logo {
+            margin-bottom: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            white-space: nowrap;
+        }
+
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.6));
+            flex-shrink: 0;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar:hover .logo-text {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .sidebar-icon {
+            font-size: 24px;
+            cursor: pointer;
+            padding: 14px;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            color: #94a3b8;
+        }
+
+        .sidebar-icon span {
+            font-size: 16px;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .sidebar:hover .sidebar-icon span {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .sidebar-icon:hover {
+            background: rgba(99, 102, 241, 0.15);
+            color: white;
+        }
+
+        .sidebar-icon.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+            color: white;
+        }
+
+        .main-content {
+            margin-left: 80px;
+            width: 100%;
+            padding: 0;
+            padding-left: calc(80px);
+            transition: padding-left 0.3s ease;
+        }
+
+        .sidebar:hover~.main-content {
+            padding-left: calc(200px);
+        }
+
+        .profile-banner {
+            height: 240px;
+            width: 100%;
+            position: relative;
+        }
+
+        .profile-banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: linear-gradient(to top, var(--bg-main), transparent);
+        }
+
+        .content-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 40px 60px 40px;
+            position: relative;
+            margin-top: -80px;
+        }
+
+        .profile-header-card {
+            display: flex;
+            align-items: flex-end;
+            gap: 32px;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .profile-avatar-wrapper {
+            position: relative;
+        }
+
+        .profile-avatar {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+            border: 6px solid var(--bg-main);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+            color: white;
+        }
+
+        .profile-details {
+            padding-bottom: 16px;
+            flex: 1;
+        }
+
+        .profile-details h3 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .profile-meta {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+            color: #94a3b8;
+            font-size: 15px;
+        }
+
+        .profile-tag {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a78bfa;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .card {
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-header {
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 24px;
+            background: #6366f1;
+            border-radius: 2px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .form-control::placeholder {
+            color: #475569;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+            line-height: 1.6;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-primary {
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.5);
+        }
+
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            font-weight: 500;
+            font-size: 14px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: 70px;
+                flex-direction: row;
+                justify-content: space-around;
+                bottom: 0;
+                top: auto;
+                padding: 0 20px;
+                border-right: none;
+                border-top: 1px solid rgba(99, 102, 241, 0.1);
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 24px;
+                margin-bottom: 80px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-logo" onclick="navigate('index.html')">
+                <img src="robo.png" alt="Smart Study Buddy Logo" class="logo-img">
+                <span class="logo-text">Study Buddy</span>
+            </div>
+            <div class="sidebar-icon" onclick="navigate('index.html')">
+                <div>🏠</div> <span>Dashboard</span>
+            </div>
+            <div class="sidebar-icon" onclick="navigate('upload.html')">
+                <div>📤</div> <span>Upload</span>
+            </div>
+            <div class="sidebar-icon" onclick="navigate('search.html')">
+                <div>🔍</div> <span>Search</span>
+            </div>
+            <div class="sidebar-icon" onclick="navigate('chatbot.html')">
+                <div>🤖</div> <span>Lumi</span>
+            </div>
+            <div class="sidebar-icon active" onclick="navigate('profile.html')">
+                <div>👤</div> <span>Profile</span>
+            </div>
+            <div style="flex: 1;"></div>
+            <div class="sidebar-icon" onclick="logout()">
+                <div>🚪</div> <span>Logout</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="profile-banner"></div>
+
+            <div class="content-container">
+                <div class="profile-header-card">
+                    <div class="profile-avatar-wrapper">
+                        <div class="profile-avatar">👤</div>
+                    </div>
+                    <div class="profile-details">
+                        <h3 id="profileFullName">Loading...</h3>
+                        <div class="profile-meta">
+                            <span id="profileUsername">@username</span>
+                            <span>•</span>
+                            <span id="profileEmail">email@example.com</span>
+                            <span>•</span>
+                            <span id="profileInstitution" class="profile-tag">Institution</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="section-header">
+                        <div class="section-title">Edit Profile Information</div>
+                    </div>
+
+                    <div id="successAlert" class="alert alert-success" style="display: none;">
+                        <span>✓</span> Profile updated successfully!
+                    </div>
+
+                    <form id="profileForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" id="editFullName" class="form-control" placeholder="John Doe">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Current Institution</label>
+                                <input type="text" id="editInstitution" class="form-control" placeholder="University Name">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">Preferred Study Subject</label>
+                                <input type="text" id="editSubject" class="form-control" placeholder="e.g. Computer Science, Neuroscience">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">About Me / Bio</label>
+                                <textarea id="editBio" class="form-control" placeholder="Share your academic goals and interests..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api';
+
+        function navigate(page) {
+            window.location.href = page;
+        }
+
+        function logout() {
+            localStorage.removeItem('access_token');
+            window.location.href = 'login.html';
+        }
+
+        async function loadProfile() {
+            const token = localStorage.getItem('access_token');
+            try {
+                const response = await fetch(`${API_URL}/auth/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const user = await response.json();
+                    document.getElementById('profileFullName').textContent = user.full_name || 'User';
+                    document.getElementById('profileUsername').textContent = '@' + user.username;
+                    document.getElementById('profileEmail').textContent = user.email;
+                    document.getElementById('profileInstitution').textContent = user.institution || 'No Institution';
+                    document.getElementById('editFullName').value = user.full_name || '';
+                    document.getElementById('editInstitution').value = user.institution || '';
+                    document.getElementById('editSubject').value = user.preferred_subject || '';
+                    document.getElementById('editBio').value = user.bio || '';
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('access_token');
+            const updates = {
+                full_name: document.getElementById('editFullName').value,
+                institution: document.getElementById('editInstitution').value,
+                preferred_subject: document.getElementById('editSubject').value,
+                bio: document.getElementById('editBio').value
+            };
+            try {
+                const response = await fetch(`${API_URL}/auth/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updates)
+                });
+                if (response.ok) {
+                    const alertBox = document.getElementById('successAlert');
+                    alertBox.style.display = 'flex';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    setTimeout(() => { alertBox.style.display = 'none'; }, 3000);
+                    loadProfile();
+                }
+            } catch (error) { alert('Error updating profile'); }
+        });
+
+        if (!localStorage.getItem('access_token')) { window.location.href = 'login.html'; }
+
+        loadProfile();
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        applyTheme(savedTheme);
+
+        window.addEventListener('storage', () => {
+            const theme = localStorage.getItem('theme') || 'dark';
+            applyTheme(theme);
+        });
+    </script>
+</body>
+
+</html>

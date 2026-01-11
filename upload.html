@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload - Smart Study Buddy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Color Palette Logic */
+        :root {
+            --bg-main: #0a0a0f;
+            --bg-sidebar: rgba(18, 18, 27, 0.95);
+            --bg-card: rgba(18, 18, 27, 0.7);
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+
+        [data-theme="light"] {
+            --bg-main: #f5f7f2;
+            --bg-sidebar: #cedef2;
+            --bg-card: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --border: #cbd5e0;
+            --accent: linear-gradient(135deg, #5b84b1 0%, #8da3cf 100%);
+        }
+
+        /* Essential Fix: Linking elements to variables */
+        body {
+            background: var(--bg-main) !important;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar {
+            background: var(--bg-sidebar) !important;
+            border-right: 1px solid var(--border);
+        }
+
+        .card, .progress-container, .format-item {
+            background: var(--bg-card) !important;
+            border: 1px solid var(--border) !important;
+        }
+
+        .top-nav h1, .brand-name, .card-title, .upload-zone h4 {
+            color: var(--text-primary) !important;
+            background: none !important;
+            -webkit-text-fill-color: initial !important;
+        }
+
+        .card-description, .upload-zone p, .format-details p {
+            color: var(--text-secondary) !important;
+        }
+
+        .upload-zone {
+            background: radial-gradient(circle at center, rgba(99, 102, 241, 0.08) 0%, transparent 100%) !important;
+            border: 2px dashed var(--border) !important;
+        }
+
+        .btn-primary {
+            background: var(--accent) !important;
+        }
+
+        .progress-bar-bg {
+            background: var(--border) !important;
+        }
+
+        /* Theme Toggle Button Styling */
+        .theme-toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 80px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            min-height: 100vh;
+            color: #ffffff;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: rgba(18, 18, 27, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(99, 102, 241, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 0;
+            gap: 8px;
+            width: 80px;
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        .sidebar:hover {
+            width: 200px;
+            align-items: flex-start;
+            padding-left: 20px;
+        }
+
+        .sidebar-logo {
+            margin-bottom: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            white-space: nowrap;
+        }
+
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.6));
+            flex-shrink: 0;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar:hover .logo-text {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .sidebar-icon {
+            font-size: 24px;
+            cursor: pointer;
+            padding: 14px;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            color: #94a3b8;
+        }
+
+        .sidebar-icon span {
+            font-size: 16px;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .sidebar:hover .sidebar-icon span {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .sidebar-icon:hover {
+            background: rgba(99, 102, 241, 0.15);
+            color: white;
+        }
+
+        .sidebar-icon.active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+            color: white;
+        }
+
+        .main-content {
+            margin-left: 80px;
+            padding: 40px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-left: calc(80px + 40px);
+            transition: padding-left 0.3s ease;
+        }
+
+        .sidebar:hover~.main-content {
+            padding-left: calc(200px + 40px);
+        }
+
+        .top-nav {
+            margin-bottom: 48px;
+        }
+
+        .top-nav h1 {
+            font-size: 42px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 32px;
+            align-items: start;
+        }
+
+        .card {
+            background: rgba(18, 18, 27, 0.7);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .card-body {
+            padding: 40px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-description {
+            color: #94a3b8;
+            margin-bottom: 32px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .upload-zone {
+            border: 2px dashed rgba(99, 102, 241, 0.3);
+            border-radius: 20px;
+            padding: 60px 40px;
+            text-align: center;
+            background: radial-gradient(circle at center, rgba(99, 102, 241, 0.08) 0%, rgba(18, 18, 27, 0) 100%);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-icon-wrapper {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.2) inset;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            filter: drop-shadow(0 4px 6px rgba(99, 102, 241, 0.4));
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.03);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #6366f1;
+        }
+
+        .progress-container {
+            margin-top: 32px;
+            background: rgba(18, 18, 27, 0.5);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .progress-bar-bg {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            height: 8px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+            height: 100%;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+        }
+
+        .alert {
+            padding: 24px;
+            border-radius: 16px;
+            margin-top: 24px;
+            display: none;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background: linear-gradient(to right, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            color: #86efac;
+        }
+
+        .alert-error {
+            background: linear-gradient(to right, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .format-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .format-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .format-item:hover {
+            background: rgba(99, 102, 241, 0.08);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateX(4px);
+        }
+
+        .format-icon-box {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .format-details h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .format-details p {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        @media (max-width: 1024px) {
+            .content-grid { grid-template-columns: 1fr; }
+            .main-content { padding-left: calc(80px + 30px); padding-right: 30px; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: 70px; flex-direction: row; justify-content: space-around; bottom: 0; top: auto; padding: 0 20px; border-right: none; border-top: 1px solid rgba(99, 102, 241, 0.1); transition: none; }
+            .main-content { margin-left: 0; padding: 24px; margin-bottom: 80px; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-logo" onclick="navigate('index.html')">
+                <img src="robo.png" alt="Smart Study Buddy Logo" class="logo-img">
+                <span class="logo-text">Study Buddy</span>
+            </div>
+            <div class="sidebar-icon" onclick="navigate('index.html')">
+                <div>🏠</div> <span>Dashboard</span>
+            </div>
+            <div class="sidebar-icon active" onclick="navigate('upload.html')">
+                <div>📤</div> <span>Upload</span>
+            </div>
+            <div class="sidebar-icon" onclick="navigate('search.html')">
+                <div>🔍</div> <span>Search</span>
+            </div>
+            <div class="sidebar-icon" onclick="navigate('chatbot.html')">
+                <div>🤖</div> <span>Lumi</span>
+            </div>
+            <div class="sidebar-icon" onclick="navigate('profile.html')">
+                <div>👤</div> <span>Profile</span>
+            </div>
+            <div style="flex: 1;"></div>
+            <div class="sidebar-icon" onclick="logout()">
+                <div>🚪</div> <span>Logout</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="top-nav">
+                <h1>Upload Materials</h1>
+            </div>
+
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title">✨ Add Your Documents</h2>
+                        <p class="card-description">Drag and drop your files here to unlock AI-powered insights,
+                            summaries, and study tools.</p>
+
+                        <div class="upload-zone" id="uploadZone" ondrop="handleDrop(event)"
+                            ondragover="handleDropZone(event, true)" ondragleave="handleDropZone(event, false)">
+                            <div class="upload-icon-wrapper">
+                                <div class="upload-icon">📁</div>
+                            </div>
+                            <h4 style="margin: 0 0 8px; font-size: 18px; font-weight: 600;">Drag & Drop files here</h4>
+                            <p style="color: #94a3b8; margin-bottom: 24px; font-size: 14px;">or click to browse your
+                                computer</p>
+                            <input type="file" id="fileInput" multiple accept=".pdf,.docx,.doc,.txt,.png,.jpg,.jpeg"
+                                style="display: none;" onchange="handleFileSelect(event)">
+                            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                                <span>Select Files</span>
+                            </button>
+                        </div>
+
+                        <div id="uploadProgress" class="progress-container" style="display: none;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <p style="font-weight: 600; color: #e2e8f0;">Uploading: <span
+                                        id="fileName">filename</span></p>
+                                <span style="color: #6366f1; font-size: 14px;">Processing...</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" id="progressBar" style="width: 0%;"></div>
+                            </div>
+                            <p style="color: #94a3b8; font-size: 13px; margin-top: 8px;">Extracting text and analyzing
+                                content...</p>
+                        </div>
+
+                        <div id="uploadSuccess" class="alert alert-success" style="display: none;">
+                            <div style="display: flex; gap: 16px; align-items: flex-start;">
+                                <div style="font-size: 28px; color: #34d399;">✓</div>
+                                <div>
+                                    <h4 style="margin: 0 0 8px; font-size: 16px; font-weight: 700;">Upload Complete!
+                                    </h4>
+                                    <p id="successMessage" style="margin: 0 0 20px; color: #cbd5e1; font-size: 14px;">
+                                    </p>
+                                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                        <button class="btn btn-primary" onclick="navigate('index.html')">Go to
+                                            Dashboard</button>
+                                        <button class="btn btn-outline" onclick="resetUpload()">Upload Another</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="uploadError" class="alert alert-error" style="display: none;">
+                            <div style="display: flex; gap: 16px; align-items: flex-start;">
+                                <div style="font-size: 28px; color: #f87171;">✕</div>
+                                <div>
+                                    <h4 style="margin: 0 0 8px; font-size: 16px; font-weight: 700;">Upload Failed</h4>
+                                    <p id="errorMessage" style="margin: 0 0 20px; color: #cbd5e1; font-size: 14px;"></p>
+                                    <button class="btn btn-outline" onclick="resetUpload()">Try Again</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title" style="font-size: 18px;">📋 Supported Formats</h4>
+                        <p class="card-description" style="margin-bottom: 24px;">We support a wide range of document
+                            types for text extraction.</p>
+
+                        <div class="format-list">
+                            <div class="format-item">
+                                <div class="format-icon-box">📄</div>
+                                <div class="format-details">
+                                    <h4>PDF Documents</h4>
+                                    <p>.pdf (text-based & scanned)</p>
+                                </div>
+                            </div>
+                            <div class="format-item">
+                                <div class="format-icon-box">📝</div>
+                                <div class="format-details">
+                                    <h4>Word Documents</h4>
+                                    <p>.docx, .doc</p>
+                                </div>
+                            </div>
+                            <div class="format-item">
+                                <div class="format-icon-box">📃</div>
+                                <div class="format-details">
+                                    <h4>Plain Text</h4>
+                                    <p>.txt files</p>
+                                </div>
+                            </div>
+                            <div class="format-item">
+                                <div class="format-icon-box">🖼️</div>
+                                <div class="format-details">
+                                    <h4>Images (OCR)</h4>
+                                    <p>.png, .jpg, .jpeg</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api';
+
+        function navigate(page) { window.location.href = page; }
+        function logout() { localStorage.removeItem('access_token'); window.location.href = 'login.html'; }
+
+        function handleDropZone(e, active) {
+            e.preventDefault();
+            document.getElementById('uploadZone').classList.toggle('dragover', active);
+        }
+
+        function handleDrop(e) {
+            handleDropZone(e, false);
+            uploadFiles(e.dataTransfer.files);
+        }
+
+        function handleFileSelect(e) { uploadFiles(e.target.files); }
+
+        async function uploadFiles(files) {
+            if (files.length === 0) return;
+            const file = files[0];
+            const token = localStorage.getItem('access_token');
+            if (!token) { window.location.href = 'login.html'; return; }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const zone = document.getElementById('uploadZone');
+            zone.style.opacity = '0.5';
+            zone.style.pointerEvents = 'none';
+            document.getElementById('uploadProgress').style.display = 'block';
+            document.getElementById('fileName').textContent = file.name;
+
+            const progressBar = document.getElementById('progressBar');
+            let width = 10;
+            const interval = setInterval(() => {
+                if (width >= 90) clearInterval(interval);
+                width += Math.random() * 5;
+                progressBar.style.width = Math.min(width, 90) + '%';
+            }, 300);
+
+            try {
+                const response = await fetch(`${API_URL}/notes/upload`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                clearInterval(interval);
+                if (response.ok) {
+                    const data = await response.json();
+                    progressBar.style.width = '100%';
+                    setTimeout(() => {
+                        document.getElementById('uploadProgress').style.display = 'none';
+                        document.getElementById('uploadSuccess').style.display = 'block';
+                        document.getElementById('successMessage').textContent = `"${data.file_name}" uploaded successfully.`;
+                    }, 500);
+                } else { throw new Error('Upload failed'); }
+            } catch (error) {
+                clearInterval(interval);
+                document.getElementById('uploadProgress').style.display = 'none';
+                document.getElementById('uploadError').style.display = 'block';
+                document.getElementById('errorMessage').textContent = error.message;
+                zone.style.opacity = '1';
+                zone.style.pointerEvents = 'auto';
+            }
+        }
+
+        function resetUpload() {
+            document.getElementById('fileInput').value = '';
+            ['uploadProgress', 'uploadError', 'uploadSuccess'].forEach(id => document.getElementById(id).style.display = 'none');
+            document.getElementById('uploadZone').style.opacity = '1';
+            document.getElementById('uploadZone').style.pointerEvents = 'auto';
+            document.getElementById('progressBar').style.width = '0%';
+        }
+
+        if (!localStorage.getItem('access_token')) window.location.href = 'login.html';
+
+        /* --- THEME LOGIC --- */
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        applyTheme(savedTheme);
+
+        window.addEventListener('storage', () => {
+            const theme = localStorage.getItem('theme') || 'dark';
+            applyTheme(theme);
+        });
+    </script>
+</body>
+
+</html>

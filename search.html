@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search - Smart Study Buddy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Color Palette Logic */
+        :root {
+            --bg-main: #0a0a0f;
+            --bg-sidebar: rgba(18, 18, 27, 0.95);
+            --bg-card: rgba(18, 18, 27, 0.7);
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+
+        [data-theme="light"] {
+            --bg-main: #f5f7f2;
+            --bg-sidebar: #cedef2;
+            --bg-card: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --border: #cbd5e0;
+            --accent: linear-gradient(135deg, #5b84b1 0%, #8da3cf 100%);
+        }
+
+        /* Essential Fix: Linking elements to variables */
+        body {
+            background: var(--bg-main) !important;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar {
+            background: var(--bg-sidebar) !important;
+            border-right: 1px solid var(--border);
+        }
+
+        .search-card, .result-card {
+            background: var(--bg-card) !important;
+            border: 1px solid var(--border) !important;
+        }
+
+        .top-nav h1, .brand-name, .result-title, .empty-state h4 {
+            color: var(--text-primary) !important;
+            background: none !important;
+            -webkit-text-fill-color: initial !important;
+        }
+
+        .form-control {
+            background: rgba(0, 0, 0, 0.05) !important;
+            border: 2px solid var(--border) !important;
+            color: var(--text-primary) !important;
+        }
+
+        [data-theme="dark"] .form-control {
+            background: rgba(255, 255, 255, 0.05) !important;
+        }
+
+        .result-text {
+            background: var(--bg-sidebar) !important;
+            color: var(--text-primary) !important;
+            border-left: 3px solid #6366f1 !important;
+        }
+
+        .btn-primary {
+            background: var(--accent) !important;
+        }
+
+        .score-track {
+            background: var(--border) !important;
+        }
+
+        /* Theme Toggle Button Styling */
+        .theme-toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 80px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            min-height: 100vh;
+            color: #ffffff;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: rgba(18, 18, 27, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(99, 102, 241, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 0; gap: 8px; width: 80px; position: fixed;
+            height: 100vh; z-index: 1000; transition: all 0.3s ease; overflow-x: hidden;
+        }
+
+        .sidebar:hover { width: 200px; align-items: flex-start; padding-left: 20px; }
+        .sidebar-logo { margin-bottom: 32px; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; white-space: nowrap; }
+        .logo-img { width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.6)); flex-shrink: 0; }
+        .logo-text { font-size: 18px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #a78bfa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; opacity: 0; transform: translateX(-20px); transition: all 0.3s ease; }
+        .sidebar:hover .logo-text { opacity: 1; transform: translateX(0); }
+
+        .sidebar-icon { font-size: 24px; cursor: pointer; padding: 14px; border-radius: 14px; transition: all 0.3s ease; display: flex; align-items: center; gap: 12px; width: 100%; color: #94a3b8; }
+        .sidebar-icon span { font-size: 16px; font-weight: 500; opacity: 0; transform: translateX(-20px); transition: all 0.3s ease; white-space: nowrap; }
+        .sidebar:hover .sidebar-icon span { opacity: 1; transform: translateX(0); }
+        .sidebar-icon:hover { background: rgba(99, 102, 241, 0.15); color: white; }
+        .sidebar-icon.active { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4); color: white; }
+
+        .main-content { margin-left: 80px; padding: 40px; width: 100%; max-width: 1000px; margin: 0 auto; padding-left: calc(80px + 40px); transition: padding-left 0.3s ease; }
+        .sidebar:hover~.main-content { padding-left: calc(200px + 40px); }
+
+        .top-nav { margin-bottom: 40px; }
+        .top-nav h1 { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #ffffff 0%, #a78bfa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+        .subtitle { color: #94a3b8; font-size: 16px; }
+
+        .search-card { background: rgba(18, 18, 27, 0.7); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; padding: 32px; box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5); margin-bottom: 40px; }
+        .search-form { display: flex; gap: 12px; position: relative; width: 100%; }
+        .form-control { flex: 1; padding: 18px 24px; padding-left: 50px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 16px; color: white; font-size: 16px; font-family: 'Inter', sans-serif; transition: all 0.3s ease; width: 100%; }
+        .search-icon-input { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 20px; opacity: 0.5; pointer-events: none; }
+        .form-control:focus { outline: none; background: rgba(255, 255, 255, 0.08); border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15); }
+
+        .btn { padding: 0 32px; border: none; border-radius: 16px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-family: 'Inter', sans-serif; }
+        .btn-primary { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5); }
+        .btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+        .section-title { font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .section-title::after { content: ''; flex: 1; height: 1px; background: rgba(255, 255, 255, 0.1); }
+
+        .result-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; padding: 24px; margin-bottom: 20px; transition: all 0.2s ease; }
+        .result-card:hover { border-color: rgba(99, 102, 241, 0.4); background: rgba(255, 255, 255, 0.06); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3); }
+        .result-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .result-title { color: #ffffff; font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 10px; }
+        .result-icon { font-size: 20px; background: rgba(99, 102, 241, 0.1); padding: 8px; border-radius: 8px; }
+        .result-text { color: #cbd5e1; font-size: 15px; line-height: 1.6; margin-bottom: 20px; padding: 16px; background: rgba(0, 0, 0, 0.2); border-radius: 12px; border-left: 3px solid #6366f1; }
+
+        .match-container { display: flex; align-items: center; gap: 16px; }
+        .score-label { font-size: 12px; font-weight: 600; color: #94a3b8; white-space: nowrap; }
+        .score-track { flex: 1; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 10px; overflow: hidden; }
+        .score-bar { height: 100%; background: linear-gradient(90deg, #6366f1, #ec4899); border-radius: 10px; }
+        .action-btn { background: rgba(255, 255, 255, 0.1); color: #fff; border: none; padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .action-btn:hover { background: rgba(99, 102, 241, 0.3); }
+
+        .empty-state { text-align: center; padding: 80px 20px; color: #64748b; }
+        .empty-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.3; filter: grayscale(100%); }
+
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        .skeleton { background: #1e1e2d; background-image: linear-gradient(90deg, #1e1e2d 25%, #2d2d44 50%, #1e1e2d 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+        .skeleton-card { padding: 24px; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 20px; margin-bottom: 20px; }
+        .skeleton-title { height: 24px; width: 60%; margin-bottom: 16px; }
+        .skeleton-text { height: 16px; width: 100%; margin-bottom: 8px; }
+        .skeleton-text-short { height: 16px; width: 80%; }
+        .skeleton-bar { height: 8px; width: 100%; margin-top: 20px; border-radius: 4px; }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: 70px; flex-direction: row; justify-content: space-around; bottom: 0; top: auto; padding: 0 20px; border-right: none; border-top: 1px solid rgba(99, 102, 241, 0.1); transition: none; }
+            .main-content { margin-left: 0; padding: 24px; margin-bottom: 80px; }
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        if (!localStorage.getItem('access_token')) { window.location.href = 'login.html'; }
+    </script>
+
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-logo" onclick="navigate('index.html')">
+                <img src="robo.png" alt="Smart Study Buddy" class="logo-img">
+                <span class="logo-text">Study Buddy</span>
+            </div>
+            <div class="sidebar-icon" onclick="navigate('index.html')"><div>🏠</div> <span>Dashboard</span></div>
+            <div class="sidebar-icon" onclick="navigate('upload.html')"><div>📤</div> <span>Upload</span></div>
+            <div class="sidebar-icon active" onclick="navigate('search.html')"><div>🔍</div> <span>Search</span></div>
+            <div class="sidebar-icon" onclick="navigate('chatbot.html')"><div>🤖</div> <span>Lumi</span></div>
+            <div class="sidebar-icon" onclick="navigate('profile.html')"><div>👤</div> <span>Profile</span></div>
+            <div style="flex: 1;"></div>
+            <div class="sidebar-icon" onclick="logout()"><div>🚪</div> <span>Logout</span></div>
+        </div>
+
+        <div class="main-content">
+            <div class="top-nav">
+                <h1>Semantic Search</h1>
+                <p class="subtitle">Ask questions in natural language to find answers within your documents.</p>
+            </div>
+
+            <div class="search-card">
+                <form class="search-form" onsubmit="event.preventDefault(); performSearch();">
+                    <div style="position: relative; flex: 1;">
+                        <span class="search-icon-input">🔍</span>
+                        <input type="text" id="searchQuery" class="form-control" placeholder="e.g., How does photosynthesis generate energy?">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </form>
+            </div>
+
+            <div id="searchResults" style="display: none;">
+                <div class="section-title">Search Results</div>
+                <div id="resultsContainer"></div>
+            </div>
+
+            <div id="noResults" style="display: block;">
+                <div class="empty-state">
+                    <div class="empty-icon">🧠</div>
+                    <h4 style="margin-bottom: 12px; font-size: 18px; color: #e2e8f0;">Ready to find answers?</h4>
+                    <p>Type a question above to search across all your uploaded notes using AI.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api';
+
+        function navigate(page) { window.location.href = page; }
+        function logout() { localStorage.removeItem('access_token'); window.location.href = 'login.html'; }
+
+        async function performSearch() {
+            const query = document.getElementById('searchQuery').value;
+            if (!query.trim()) return;
+
+            const btn = document.querySelector('.btn-primary');
+            const container = document.getElementById('resultsContainer');
+            const resultsSection = document.getElementById('searchResults');
+            const noResultsSection = document.getElementById('noResults');
+
+            btn.innerText = 'Searching...';
+            btn.disabled = true;
+            noResultsSection.style.display = 'none';
+            resultsSection.style.display = 'block';
+
+            container.innerHTML = Array(3).fill(0).map(() => `
+                <div class="skeleton-card">
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text-short"></div>
+                    <div class="skeleton skeleton-bar"></div>
+                </div>
+            `).join('');
+
+            try {
+                const token = localStorage.getItem('access_token');
+                const response = await fetch(`${API_URL}/search?q=${encodeURIComponent(query)}&top_k=5`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayResults(data.results || []);
+                } else {
+                    container.innerHTML = `<p style="color: #ef4444; padding: 20px;">Error: ${response.statusText}</p>`;
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                container.innerHTML = '<p style="color: #ef4444; padding: 20px;">Network error. Please try again.</p>';
+            } finally {
+                btn.innerText = 'Search';
+                btn.disabled = false;
+            }
+        }
+
+        function displayResults(results) {
+            const container = document.getElementById('resultsContainer');
+            if (results.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">❌</div>
+                        <h4 style="margin-bottom: 12px; color: #e2e8f0;">No Matches Found</h4>
+                        <p>Try rephrasing your question or uploading more documents.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = results.map((result) => {
+                const percentage = Math.max(0, (result.similarity_score * 100)).toFixed(0);
+                return `
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-title"><span class="result-icon">📄</span> ${result.file_name}</div>
+                        <button class="action-btn" onclick="navigate('note.html?note_id=${result.note_id}')">Open</button>
+                    </div>
+                    <div class="result-text">"${result.chunk_text.substring(0, 300)}${result.chunk_text.length > 300 ? '...' : ''}"</div>
+                    <div class="match-container">
+                        <span class="score-label">Relevance: ${percentage}%</span>
+                        <div class="score-track"><div class="score-bar" style="width: ${percentage}%;"></div></div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        applyTheme(savedTheme);
+
+        window.addEventListener('storage', () => {
+            const theme = localStorage.getItem('theme') || 'dark';
+            applyTheme(theme);
+        });
+    </script>
+</body>
+
+</html>
